@@ -6,29 +6,13 @@ class CVIzon : public CModule {
 public:
 	MODCONSTRUCTOR(CVIzon) {
 		bet.clear();
+		topic_changed = 0;
 	}
 
 	virtual EModRet OnTopic(CNick& Nick, CChan& Channel, CString& sTopic) {
 		/* use topic changes in #vizon as trigger for placing bets */
 		if (!Channel.GetName().CaseCmp("#vizon")) {
-			if (!bet.empty()) { /* set bet */
-				PutIRC("PRIVMSG vizon :bet " + bet);
-				return CONTINUE;
-			}
-
-			/* random bet */
-			int generated = 0;
-			srand(time(NULL));
-			while (generated < 6) {
-				int b = (rand()%29)+1;
-				CString bstr = " " + std::to_string(b) + " ";
-				if (bet.find(bstr) == std::string::npos) {
-					bet += generated ? std::to_string(b) + " " : bstr;
-					generated++;
-				}
-			}
-			PutIRC("PRIVMSG vizon :bet" + bet);
-			bet.clear();
+			topic_changed = time(NULL);
 		}
 		return CONTINUE;
 	}
@@ -51,8 +35,37 @@ public:
 		}
 	}
 
+	virtual EModRet OnChanMsg(CNick& Nick, CChan& Channel, CString& sMessage) {
+		/* yes, I'm using OnChanMsg as a scuffed timer, try and stop me */
+		if (topic_changed && (time(NULL) - topic_changed) > 6969) {
+			topic_changed = 0;
+			if (!bet.empty()) { /* set bet */
+				PutIRC("PRIVMSG vizon :bet " + bet);
+				return CONTINUE;
+			}
+
+			/* random bet */
+			int generated = 0;
+			srand(time(NULL));
+			while (generated < 6) {
+				int b = (rand()%29)+1;
+				CString bstr = " " + std::to_string(b) + " ";
+				if (bet.find(bstr) == std::string::npos) {
+					bet += generated ? std::to_string(b) + " " : bstr;
+					generated++;
+				}
+			}
+			PutIRC("PRIVMSG vizon :bet" + bet);
+			bet.clear();
+		}
+
+        return CONTINUE;
+    }
+
+
 private:
 	CString bet;
+	time_t topic_changed;
 };
 
 MODULEDEFS(CVIzon, "module for automated #VIzon bets")
