@@ -59,8 +59,8 @@ public:
 			bet.clear();
 		}
 
-        return CONTINUE;
-    }
+		return CONTINUE;
+	}
 
 
 private:
