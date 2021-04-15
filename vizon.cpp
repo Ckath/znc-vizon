@@ -9,6 +9,17 @@ public:
 		topic_changed = 0;
 	}
 
+	virtual bool OnLoad(const CString& sArgs, CString& sMessage) {
+		if (!sArgs.empty()) {
+			SetNV("bet", sArgs, true);
+			bet = sArgs;
+		} else if(HasNV("bet")) {
+			bet = GetNV("bet");
+			SetArgs(bet);
+		}
+		return true;
+	}
+
 	virtual EModRet OnTopic(CNick& Nick, CChan& Channel, CString& sTopic) {
 		/* use topic changes in #vizon as trigger for placing bets */
 		if (!Channel.GetName().CaseCmp("#vizon")) {
@@ -27,10 +38,14 @@ public:
 				return;
 			} if (!sCommand.Token(1).CaseCmp("random")) {
 				bet.clear();
+				DelNV("bet", true);
+				SetArgs("");
 				PutModule("random bets will be used for future draws");
 				return;
 			}
 			bet = sCommand.substr(sCommand.find(' ')+1);
+			SetNV("bet", bet, true);
+			SetArgs(bet);
 			PutModule(bet + " will be used for future draws");
 		}
 	}
@@ -68,4 +83,8 @@ private:
 	time_t topic_changed;
 };
 
+template <> void TModInfo<CVIzon>(CModInfo& Info) {
+	Info.SetHasArgs(true);
+	Info.SetArgsHelpText(Info.t_s("enter bet"));
+}
 MODULEDEFS(CVIzon, "module for automated #VIzon bets")

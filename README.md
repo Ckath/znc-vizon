@@ -13,6 +13,8 @@ then just load it: `/msg *status loadmod vizon`
 ## usage
 by default random bets will be made each time, you can set a fixed bet with the same syntax you use to place regular bets: `/msg *vizon bet 1 4 7 14 22 24`, or `/msg *vizon bet random` to set it to random bets again. checking the current bet is done with `/msg *vizon check`. bets are sent to VIzon as is without checking validity so make sure they're valid.
 
+changing/viewing the current bet can also be done through the webconfig.
+
 ## FAQ
 - how do I stop it from entering for me?\
 not, unload it with `/msg *status unloadmod vizon`
